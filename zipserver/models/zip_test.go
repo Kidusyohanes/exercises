@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"reflect"
 	"strings"
 	"testing"
@@ -12,6 +13,8 @@ const validdata = csvheaders + `
 98102,STANDARD,0,Seattle,,"Broadway, Capitol Hill",WA,"King County",America/Los_Angeles,"206,360,425",NA,US,47.63,-122.32,20490`
 const invaliddata = `h1,h2
 too,short`
+const mismatcheddata = `h1,h2
+too,many,columns`
 
 func TestLoadZips(t *testing.T) {
 	cases := []struct {
@@ -21,19 +24,19 @@ func TestLoadZips(t *testing.T) {
 		expectError    bool
 	}{
 		{
-			"empty input",
+			"Empty Input",
 			"",
 			nil,
 			true,
 		},
 		{
-			"only headers",
+			"Only Headers",
 			csvheaders,
 			ZipSlice{},
 			false,
 		},
 		{
-			"valid rows",
+			"Valid Rows",
 			validdata,
 			ZipSlice{
 				&Zip{"98101", "Seattle", "WA"},
@@ -42,8 +45,14 @@ func TestLoadZips(t *testing.T) {
 			false,
 		},
 		{
-			"invalid rows",
+			"Invalid Rows",
 			invaliddata,
+			nil,
+			true,
+		},
+		{
+			"Mismatched Rows",
+			mismatcheddata,
 			nil,
 			true,
 		},
@@ -57,8 +66,13 @@ func TestLoadZips(t *testing.T) {
 		if c.expectError && err == nil {
 			t.Errorf("case %s: expected error not returned", c.name)
 		}
-		if !reflect.DeepEqual(output, c.expectedOutput) {
-			t.Errorf("case %s: incorrect output: expected\n%v but got\n%v", c.name, c.expectedOutput, output)
+		if c.expectedOutput == nil && output != nil {
+			j, _ := json.MarshalIndent(output, "", "  ")
+			t.Errorf("case %s: expected nil ZipSlice but got %s", c.name, string(j))
+		} else if !reflect.DeepEqual(output, c.expectedOutput) {
+			jExpected, _ := json.MarshalIndent(c.expectedOutput, "", "  ")
+			jActual, _ := json.MarshalIndent(output, "", "  ")
+			t.Errorf("case %s: incorrect output:\nEXPECTED:\n%s\nACTUAL:\n%s", c.name, string(jExpected), string(jActual))
 		}
 	}
 }
