@@ -10,34 +10,39 @@ import (
 	"github.com/info344-s18/exercises/zipserver/models"
 )
 
-//ZipIndexHandler represents a zip index handler
+//ZipIndexHandler handles requests that should
+//return a slice of *Zip records for a given key
 type ZipIndexHandler struct {
 	index models.ZipIndex
 }
 
+//NewZipIndexHandler constructs a new ZipIndexHandler.
+//The `index` parameter will be used to get the zips
+//for the requested key.
 func NewZipIndexHandler(index models.ZipIndex) *ZipIndexHandler {
 	return &ZipIndexHandler{
 		index: index,
 	}
 }
 
+//ServeHTTP handles the HTTP requests
 func (zih *ZipIndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// /zips/city/city-name
+	//resource path will be like: /zips/city/seattle
+	//get the last part of the path and convert it
+	//to lower-case
 	key := path.Base(r.URL.Path)
 	key = strings.ToLower(key)
 
+	//tell the client that the response body is JSON
+	//and allow cross-origin requests
 	w.Header().Add(headerContentType, contentTypeJSON)
 	w.Header().Add(headerAccessControlAllowOrigin, "*")
+
+	//get the zips for the requested key
+	//and encode them into JSON
 	zips := zih.index[key]
 	json.NewEncoder(w).Encode(zips)
 }
-
-//TODO: implement an http.Handler that is
-//initialized with a ZipIndex, and handles
-//HTTP requests where the last segment of the
-//resource path is a key into that index.
-//respond by JSON-encoding the ZipSlice you get
-//from the index given the key
 
 //RootHandler handles requests for the root resource
 func RootHandler(w http.ResponseWriter, r *http.Request) {
