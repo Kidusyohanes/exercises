@@ -24,12 +24,14 @@ type ZipSlice []*Zip
 type ZipIndex map[string]ZipSlice
 
 //LoadZips loads the zip code records from CSV stream
-//returning a ZipSlice or an error.
+//returning a ZipSlice or an error. The expectedNumber
+//should be set to the expected number of records, or
+//zero if you don't know how many records there will be.
 func LoadZips(r io.Reader, expectedNumber int) (ZipSlice, error) {
-	//TODO: process the `r` as a stream of CSV records
-	//creating a Zip struct for each record, and
-	//appending that to a ZipSlice that you return
+	//create a new CSV reader over the input stream
 	reader := csv.NewReader(r)
+
+	//read the header row and ensure that there are at least 7 fields
 	fields, err := reader.Read()
 	if err != nil {
 		return nil, fmt.Errorf("error reading header row: %v", err)
@@ -38,20 +40,32 @@ func LoadZips(r io.Reader, expectedNumber int) (ZipSlice, error) {
 		return nil, fmt.Errorf("CSV has %d fields but we require %d", len(fields), 7)
 	}
 
+	//make a slice of *Zip with enough capacity
+	//to hold expectedNumber. This is just an
+	//optimization so that we can avoid reallocations
+	//as we append to the slice
 	zips := make(ZipSlice, 0, expectedNumber)
+
+	//loop until we return...
 	for {
+		//read a row from the CSV file
 		fields, err := reader.Read()
+		//if we got io.EOF as an error, we are
+		//done reading the input stream (End Of File)
 		if err == io.EOF {
 			return zips, nil
 		}
+		//if we got some other error, return it
 		if err != nil {
 			return nil, fmt.Errorf("Error parsing CSV: %v", err)
 		}
+		//create a *Zip and initialize the fields
 		z := &Zip{
 			Code:  fields[0],
 			City:  fields[3],
 			State: fields[6],
 		}
+		//append the *Zip to the slice
 		zips = append(zips, z)
 	}
 }
