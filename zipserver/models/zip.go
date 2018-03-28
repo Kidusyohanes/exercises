@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/csv"
+	"fmt"
 	"io"
 )
 
@@ -27,5 +29,29 @@ func LoadZips(r io.Reader, expectedNumber int) (ZipSlice, error) {
 	//TODO: process the `r` as a stream of CSV records
 	//creating a Zip struct for each record, and
 	//appending that to a ZipSlice that you return
-	panic("TODO:")
+	reader := csv.NewReader(r)
+	fields, err := reader.Read()
+	if err != nil {
+		return nil, fmt.Errorf("error reading header row: %v", err)
+	}
+	if len(fields) < 7 {
+		return nil, fmt.Errorf("CSV has %d fields but we require %d", len(fields), 7)
+	}
+
+	zips := make(ZipSlice, 0, expectedNumber)
+	for {
+		fields, err := reader.Read()
+		if err == io.EOF {
+			return zips, nil
+		}
+		if err != nil {
+			return nil, fmt.Errorf("Error parsing CSV: %v", err)
+		}
+		z := &Zip{
+			Code:  fields[0],
+			City:  fields[3],
+			State: fields[6],
+		}
+		zips = append(zips, z)
+	}
 }
