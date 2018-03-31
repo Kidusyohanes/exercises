@@ -13,7 +13,7 @@ Build this directory into a docker container. Remember to build the go binary fo
 When running your docker container you will need to:
 
 - Set the `PORT` environment variable on your container
-- Publish the same port as `PORT` on the container to the same port on your host machine
+- Publish the port that you set with the `PORT` environment variable to the same port on your host machine
 
 Take another look at [Dr. Stearn's Docker tutorial](https://drstearns.github.io/tutorials/docker/) if you need hints!
 
