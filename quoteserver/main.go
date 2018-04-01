@@ -101,6 +101,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error parsing quotes.csv file: %v", err)
 	}
+	f.Close()
 	log.Printf("loaded %d quotes", len(quotes))
 
 	//seed the random number generator
