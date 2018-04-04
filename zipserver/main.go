@@ -49,7 +49,13 @@ func main() {
 	//ADDR environment variable
 	addr := os.Getenv("ADDR")
 	if len(addr) == 0 {
-		addr = ":80"
+		addr = ":443"
+	}
+
+	tlsKeyPath := os.Getenv("TLSKEY")
+	tlsCertPath := os.Getenv("TLSCERT")
+	if len(tlsKeyPath) == 0 || len(tlsCertPath) == 0 {
+		log.Fatal("please set TLSKEY and TLSCERT")
 	}
 	//create a new mux and add two routes:
 	// / => root handler
@@ -59,6 +65,6 @@ func main() {
 	mux.Handle("/zips/city/", cityZipHandler)
 
 	//start the web server
-	log.Printf("server is listening at http://%s", addr)
-	log.Fatal(http.ListenAndServe(addr, mux))
+	log.Printf("server is listening at https://%s", addr)
+	log.Fatal(http.ListenAndServeTLS(addr, tlsCertPath, tlsKeyPath, mux))
 }
