@@ -14,7 +14,7 @@
 3. Parsing the whole DOM. Hint: you just need to parse the `<head>STUFF</head>`.
 
 ## Assignment 2
-1.
-2.
-3.
-4.
+1. Make sure that you fix errors from Assignment 1!
+2. Commiting certs or passwords. *Never* commit secrets to Github. 
+3. DNS Records not set up properly. Make sure you test your deployment in a web broswer or Postman!
+4. Not writing `build.sh` and `deploy.sh`.
