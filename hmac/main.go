@@ -40,6 +40,7 @@ func main() {
 	//TODO: implement this function so that after you
 	//run `go install`, your program will support the two
 	//usage examples noted above in the usage string.
+	//Note that os.Stdin is an io.Reader for the stdin stream.
 
 	//for example, running this command:
 	//  hmac sign mysecretkey < test.txt
