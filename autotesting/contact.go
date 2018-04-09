@@ -17,7 +17,7 @@ type Contact struct {
 //that field to the current time to track when the record
 //was first inserted. It will also update the UpdatedAt
 //field to the current time.
-func (c Contact) SetTrackingData() {
+func (c *Contact) SetTrackingData() {
 	//BUG: there's a subtle bug here that you need
 	//to discover and fix. Write automated tests
 	//that call this method on a Contact instance

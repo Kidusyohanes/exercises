@@ -2,6 +2,7 @@ package autotesting
 
 import (
 	"testing"
+	"time"
 )
 
 func TestContactSetTracking(t *testing.T) {
@@ -16,5 +17,19 @@ func TestContactSetTracking(t *testing.T) {
 	//.SetTrackingData(), and again just after that
 	//call returns, you can expect any modified field
 	//values to be between those two times.
+	cases := []struct {
+		name    string
+		contact Contact
+	}{
+		{"Both Fields Zero", Contact{FirstName: "test", LastName: "test"}},
+	}
 
+	for _, c := range cases {
+		before := time.Now()
+		c.contact.SetTrackingData()
+		end := time.Now()
+		if c.contact.InsertedAt.Before(before) || c.contact.InsertedAt.After(end) {
+			t.Errorf("case %s: incorrect InsertedAt: expected between %v and %v, but got %v", c.name, before, end, c.contact.InsertedAt)
+		}
+	}
 }
