@@ -2,6 +2,7 @@ package autotesting
 
 import (
 	"crypto/sha256"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
@@ -63,7 +64,7 @@ func IdenticonHandler(w http.ResponseWriter, r *http.Request) {
 	//if none was provided...
 	if len(name) == 0 {
 		//respond with a bad request status code
-		http.Error(w, "please supply a `name` parameter", http.StatusBadRequest)
+		fmt.Fprintf(w, "%d: please supply a name parameter", http.StatusBadRequest)
 		return
 	}
 	//respond to the client with the identicon
