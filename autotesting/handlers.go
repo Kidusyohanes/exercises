@@ -2,12 +2,12 @@ package autotesting
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
 	"image/png"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -55,23 +55,21 @@ func identicon(data string) image.Image {
 
 //IdenticonHandler handles requests for identicons
 func IdenticonHandler(w http.ResponseWriter, r *http.Request) {
-	//BUGS: there are some bad bugs in this handler!
-	//Write automated tests to uncover them, then fix the
-	//handler code until the tests pass.
+	w.Header().Add(headerAccessControlAllowOrigin, originAny)
 
 	//get the name from the query string parameter `name`
 	name := r.URL.Query().Get("name")
+	name = strings.TrimSpace(name)
 	//if none was provided...
 	if len(name) == 0 {
 		//respond with a bad request status code
-		fmt.Fprintf(w, "%d: please supply a name parameter", http.StatusBadRequest)
+		http.Error(w, "please supply a name parameter", http.StatusBadRequest)
 		return
 	}
+	//tell the client what type of content is in the response
+	w.Header().Add(headerContentType, contentTypePNG)
+
 	//respond to the client with the identicon
 	//image encoded into PNG
 	png.Encode(w, identicon(name))
-	//tell the client what type of content is in the response
-	w.Header().Add(headerContentType, contentTypePNG)
-	//allow cross-origin requests
-	w.Header().Add(headerAccessControlAllowOrigin, originAny)
 }
