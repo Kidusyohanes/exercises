@@ -1,13 +1,25 @@
 package autotesting
 
 import (
+	"reflect"
 	"testing"
 )
 
 func TestMergeSort(t *testing.T) {
-	//TODO: write tests for the MergeSort()
-	//function, discover the bugs, and fix them
-	//until the tests pass. If your tests are passing
-	//without making any changes to MergeSort()
-	//and Merge(), you're not testing correctly!
+	cases := []struct {
+		input          []int
+		expectedOutput []int
+	}{
+		{
+			[]int{3, 1, 2},
+			[]int{1, 2, 3},
+		},
+	}
+
+	for _, c := range cases {
+		output := MergeSort(c.input)
+		if !reflect.DeepEqual(output, c.expectedOutput) {
+			t.Errorf("incorrect output for %v: expected %v but got %v", c.input, c.expectedOutput, output)
+		}
+	}
 }
