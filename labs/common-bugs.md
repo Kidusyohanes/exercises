@@ -18,3 +18,12 @@
 2. Commiting certs or passwords. *Never* commit secrets to Github. 
 3. DNS Records not set up properly. Make sure you test your deployment in a web broswer or Postman!
 4. Not writing `build.sh` and `deploy.sh`.
+
+## Assignment 3
+1. Generating session ID's
+  a. Not writing random bytes into the first `idLength` of bytes: hint - use `rand` package.
+  b. Incorrectly hashing the HMAC in the rest of the session ID.
+2. User models
+  a. Encoding Gravatar urls improperly. Use **hex**, not base64.
+3. Pointers - pass pointers to structs into functions (generally), don't pass the struct, and don't pass pointers to pointers.
+4. 
