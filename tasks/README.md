@@ -122,5 +122,5 @@ docker run --rm \
 -e MYSQL_ADDR=tasksdb:3306 \
 -e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
 -e MYSQL_DATABASE=$MYSQL_DATABASE \
-your-dh-name/your-container-name insert "My Sample Task"
+your-dh-name/tasks insert "My Sample Task"
 ```
