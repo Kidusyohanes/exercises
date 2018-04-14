@@ -53,3 +53,33 @@ Refer to the tutorial for examples of [inserting new rows](https://drstearns.git
 
 The `main.go` file contains the `main()` entry point function. There is some code in there already, but you need to implement the rest according to the `TODO:` comments. Note that the `logger` variable created at the top can be used to write fatal messages and exit with a non-zero status code (`log.Fatalf()`), or write other messages without exiting (`log.Printf()`).
 
+## Try It
+
+Compile and install your new CLI program using `go install`. Then run it using commands like these (use `tasks.exe` on Windows):
+
+```bash
+# use tasks.exe on Windows
+tasks insert "Test Task"
+tasks list
+tasks update 1 true
+tasks purge
+tasks list
+```
+
+## Extend It
+
+If you get done with the basic functionality before the end of lecture, add support for attaching multiple "tags" to each task. For example, when inserting a task, you should be able to do something like this:
+
+```bash
+tasks insert "Test Task" tag1 tag2 tag3
+```
+
+These tags should be stored in a separate table from the task itself, using the task's ID as a foreign key. Use a database transaction to ensure that saving the task _and_ all of its tags are done in one atomic operation.
+
+Then extend the `tasks list` command to accept a tag you want to filter by. For example, the command:
+
+```bash
+tasks list mytag
+```
+
+should find all tasks that have the tag `mytag`.
