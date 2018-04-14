@@ -27,13 +27,15 @@ func (s *MySQLStore) GetAll() ([]*Task, error) {
 	panic("TODO: implement this function")
 }
 
-//Get returns a specific task
+//Get returns a specific task, or ErrNotFound
+//if the requested task does not exist
 func (s *MySQLStore) Get(id int64) (*Task, error) {
 	panic("TODO: implement this function")
 }
 
 //Update updates a task, setting only the completed state,
-//and returns a copy of the updated Task
+//and returns a copy of the updated Task. It returns
+//nil and ErrNotFound if the task ID does not exist.
 func (s *MySQLStore) Update(id int64, completed bool) (*Task, error) {
 	panic("TODO: implement this function")
 }

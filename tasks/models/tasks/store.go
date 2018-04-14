@@ -1,5 +1,11 @@
 package tasks
 
+import "errors"
+
+//ErrNotFound is returned from methods like Get()
+//and Update() when the specific task ID is not found
+var ErrNotFound = errors.New("record not found")
+
 //Store represents a store for Tasks
 type Store interface {
 	//Insert inserts a task into the database, returning
