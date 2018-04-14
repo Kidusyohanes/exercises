@@ -26,7 +26,7 @@ export MYSQL_ROOT_PASSWORD=$(openssl rand -base64 18)
 export MYSQL_DATABASE=tasksex
 ```
 
-Now run a detached instance of your container image, publishing port `127.0.0.1:3306` on the host to port `3306` in the container, and forwarding these two environment variables:
+Now run a detached instance of your customized MySQL container image, publishing port `127.0.0.1:3306` on the host to port `3306` in the container, and forwarding these two environment variables:
 
 ```bash
 docker run -d \
@@ -54,6 +54,12 @@ Refer to the tutorial for examples of [inserting new rows](https://drstearns.git
 The `main.go` file contains the `main()` entry point function. There is some code in there already, but you need to implement the rest according to the `TODO:` comments. Note that the `logger` variable created at the top can be used to write fatal messages and exit with a non-zero status code (`log.Fatalf()`), or write other messages without exiting (`log.Printf()`).
 
 ## Try It
+
+Your Go CLI program needs the `MYSQL_ADDR` environment variable set to the network address of your MySQL server, which is currently listening on `127.0.0.1:3306`:
+
+```bash
+export MYSQL_ADDR=127.0.0.1:3306
+```
 
 Compile and install your new CLI program using `go install`. Then run it using commands like these (use `tasks.exe` on Windows):
 
@@ -83,3 +89,38 @@ tasks list mytag
 ```
 
 should find all tasks that have the tag `mytag`.
+
+## Lab: Docker Private Networks
+
+Currently your MySQL server is accepting connections from any host program, which is fine for development, but in production we want to run the MySQL server and our Go program in a Docker private network. That way the MySQL server will accept connections only from other container instances running within the private network, so nothing else running on the host will be able to connect to it.
+
+Stop and remove your current MySQL container instance. Use `docker ps -a` to ensure that it's no longer running.
+
+Create a new Docker private network using this command:
+
+```bash
+# last argument is the name of your network
+docker network create tasksnet
+```
+
+Now run an instance of your customized MySQL container in this private network by adding the `--network` flag set to the name of your new private network, use the `--name` flag to define this container's host name within the network, and **do not publish any ports**. The overall command should look something like this:
+
+```bash
+docker run -d \
+--network tasksnet \
+--name tasksdb \
+-e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+-e MYSQL_DATABASE=$MYSQL_DATABASE \
+your-dh-name/your-container-name
+```
+
+Now [Dockerize your Go CLI program](https://drstearns.github.io/tutorials/docker/#seccontainersforgowebservers). Then run instances of it in the same Docker private network as your customized MySQL server. Set the `MYSQL_ADDR` to the container name of your MySQL server, as that name is the network host name within the private network. Also note that you can still pass command-line arguments after your container name at the end of the `docker run` command:
+
+```bash
+docker run --rm \
+--network tasksnet \
+-e MYSQL_ADDR=tasksdb:3306 \
+-e MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
+-e MYSQL_DATABASE=$MYSQL_DATABASE \
+your-dh-name/your-container-name insert "My Sample Task"
+```
