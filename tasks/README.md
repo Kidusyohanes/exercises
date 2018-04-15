@@ -1,6 +1,6 @@
 # Tasks CLI Exercise
 
-This directory contains the starter files for a `tasks` command-line program that you will implement. This program will allow users to insert, select, update, and delete tasks stored in a relational database management system (RDBMS) such as [MySQL](https://hub.docker.com/_/mysql/).
+This directory contains the starter files for a `tasks` command-line interface (CLI) program that you will implement. This program will allow users to insert, select, update, and delete tasks stored in a relational database management system (RDBMS) such as [MySQL](https://hub.docker.com/_/mysql/).
 
 By implementing this, you will learn how to interact with an RDBMS from Go. This is the first step towards building an HTTP API server that interacts with an RDBMS.
 
@@ -72,9 +72,76 @@ tasks purge
 tasks list
 ```
 
+## Write Automated Unit Tests for the MySQLStore
+
+Your CLI will let you interactively test your MySQLStore implementation, but it would be better for the long-term to write some automated unit tests.
+
+Writing unit tests for code that interacts with a SQL database can be tricky, as unit tests are supposed to focus only on the logic of the functions you are testing, and not how they integrate with other components in your system. It can also be difficult to trigger unexpected DBMS or I/O errors to ensure your store handles them properly.
+
+Thankfully the `sql/driver` package in Go was defined as a set of _interfaces_, which means we can use a mock implementation of those interfaces in our unit tests. A mock implementation doesn't actually interact with a SQL database, but instead ensures that the methods you expected to be called were indeed called with the appropriate inputs. It can also be configured to return unexpected DBMS or I/O errors.
+
+The [go-sqlmock package](https://github.com/DATA-DOG/go-sqlmock) provides a very handy mock implementation of the `sql` package interfaces. Install the package using this command:
+
+```bash
+go get gopkg.in/DATA-DOG/go-sqlmock.v1
+```
+
+And then use it your automated tests:
+
+```go
+func TestGetAll(t *testing.T) {
+	//create a new sql mock
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("error creating sql mock: %v", err)
+	}
+	//ensure it's closed at the end of the test
+	defer db.Close()
+
+	//construct a new task and a set of rows to return
+	expectedTask := &Task{
+		ID:        1,
+		Title:     "test task",
+		Completed: true,
+	}
+	rows := sqlmock.NewRows([]string{"id", "title", "completed"})
+	rows.AddRow(expectedTask.ID, expectedTask.Title, expectedTask.Completed)
+
+	//tell sqlmock that we expect the function to execute a
+	//a particular SQL query, and that it should return the
+	//rows we constructed above
+	mock.ExpectQuery("select id,title,completed from tasks").WillReturnRows(rows)
+
+	//construct a new MySQLStore using the mock db
+	store := NewMySQLStore(db)
+
+	//call the GetAll() method
+	tasks, err := store.GetAll()
+	//we shouldn't get an error
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	//but we should get back our one task
+	if len(tasks) != 1 {
+		t.Errorf("incorrect number of tasks returned: expected %d but got %d",
+			1, len(tasks))
+	}
+	if tasks[0].Title != expectedTask.Title {
+		t.Errorf("incorrect task title: expected %s but got %s",
+			expectedTask.Title, tasks[0].Title)
+	}
+	//ensure we didn't have any unmet expectations
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("unmet sqlmock expectations: %v", err)
+	}
+}
+```
+
+This example tests a successful query that returned rows, but you can also configure the mock to return errors. See the [package documentation](https://godoc.org/github.com/DATA-DOG/go-sqlmock) for full details.
+
 ## Extend It
 
-If you get done with the basic functionality before the end of lecture, add support for attaching multiple "tags" to each task. For example, when inserting a task, you should be able to do something like this:
+If you get done with the basic functionality and tests before the end of lecture, add support for attaching multiple "tags" to each task. For example, when inserting a task, you should be able to do something like this:
 
 ```bash
 tasks insert "Test Task" tag1 tag2 tag3
