@@ -23,7 +23,7 @@ The MySQL Docker container image uses a few environment variables to setup the r
 export MYSQL_ROOT_PASSWORD=$(openssl rand -base64 18)
 
 # default database name
-export MYSQL_DATABASE=tasksex
+export MYSQL_DATABASE=tasks
 ```
 
 Now run a detached instance of your customized MySQL container image, publishing port `127.0.0.1:3306` on the host to port `3306` in the container, and forwarding these two environment variables:
