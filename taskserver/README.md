@@ -32,7 +32,7 @@ Back in `main.go`, create a mux, add your handler functions, and start your web 
 
 Ensure that your MySQL server is running, and that you've set the various `MYSQL_*` environment variables. Then start your API server!
 
-## Test is Using Postman
+## Test it Using Postman
 
 To test your API server interactively, use [Postman](https://www.getpostman.com/). This tool lets you [send HTTP requests](https://www.getpostman.com/docs/v6/postman/sending_api_requests/requests) using any method, resource path, headers, and body. Test your various APIs and ensure that you get back the expected responses.
 
