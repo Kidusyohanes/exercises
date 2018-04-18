@@ -30,10 +30,34 @@ func (ctx *Context) TasksHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		respond(w, task, http.StatusCreated)
+
+	case methodPurge:
+		//TODO: purge all completed tasks
+
+	default:
+		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
+		return
 	}
 }
 
 func (ctx *Context) SpecificTaskHandler(w http.ResponseWriter, r *http.Request) {
 	//gets the last segment of the path
 	//reqID := path.Base(r.URL.Path)
+	//TODO: implement support for:
+	//PATCH /v1/tasks/<task-id>
+	//GET /v1/tasks/<task-id>
+	//using your ctx.store
+	switch r.Method {
+	case http.MethodGet:
+		//TODO: get the specific task id
+
+	case http.MethodPatch:
+		//TODO: update the requested task
+		//using the Completed field in
+		//the request body
+
+	default:
+		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
+		return
+	}
 }
