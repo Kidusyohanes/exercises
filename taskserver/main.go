@@ -59,6 +59,7 @@ func main() {
 	//for your REST API
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/tasks", hctx.TasksHandler)
+	mux.HandleFunc("/v1/tasks/", hctx.SpecificTaskHandler)
 
 	//TODO: start the web server
 	log.Printf("server is listening at http://%s", addr)
