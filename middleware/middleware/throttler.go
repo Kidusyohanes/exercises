@@ -8,6 +8,7 @@ import (
 )
 
 const headerRetryAfter = "Retry-After"
+const headerForwardedFor = "X-Forwarded-For"
 
 //Throttler is a request throttling handler
 type Throttler struct {
