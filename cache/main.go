@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"time"
 )
@@ -14,10 +13,10 @@ func worker(c *TTLCache) {
 		//from the shared TTLCache
 		i := rand.Intn(20)
 		k := fmt.Sprintf("%d", i)
-		log.Printf("setting %s=%d", k, i)
+		//log.Printf("setting %s=%d", k, i)
 		c.Set(k, i, time.Second*5)
-		i2 := c.Get(k).(int)
-		log.Printf("got %d", i2)
+		//i2 := c.Get(k).(int)
+		//log.Printf("got %d", i2)
 		time.Sleep(time.Millisecond * time.Duration(i))
 	}
 }
