@@ -6,7 +6,7 @@ NC='\033[0m'
 # source the env
 source ".env"
 
-echo -e >&2 "${GREEN}starting TimeDB...${NC}"
+echo -e >&2 "${GREEN}starting SongDB...${NC}"
 
 if [ -z "$(docker network ls --filter name=pythonnet --quiet)" ]; then
     echo -e >&2 "${YELLOW}docker network missing; creating it...${NC}"
@@ -14,9 +14,9 @@ if [ -z "$(docker network ls --filter name=pythonnet --quiet)" ]; then
     echo -e >&2 "${YELLOW}done!${NC}"
 fi
 
-if [ "$(docker ps -aq --filter name=timedb)" ]; then
-    echo -e >&2 "${YELLOW}container exists with name timedb; removing it...${NC}"
-	docker rm -f timedb
+if [ "$(docker ps -aq --filter name=songdb)" ]; then
+    echo -e >&2 "${YELLOW}container exists with name songdb; removing it...${NC}"
+	docker rm -f songdb
     echo -e >&2 "${YELLOW}done!${NC}"
 fi
 
@@ -24,8 +24,8 @@ docker run -d \
 -p 3306:3306 \
 -e MYSQL_ROOT_PASSWORD=$MYSQL_PASSWORD \
 -e MYSQL_DATABASE=$MYSQL_DATABASE \
---name timedb \
-aethan/timedb
+--name songdb \
+aethan/songdb
 
 # echo -e >&2 "${GREEN}waiting for MySQL to be ready for connections..."
 # sleep 7s
