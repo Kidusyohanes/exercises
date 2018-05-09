@@ -9,6 +9,11 @@ public class AsyncErrorHandler extends ErrorHandler {
         super(handler);
     }
 
+    // The normal error handler doesn't work for async operations
+    // since the try-catch logic will end up on a different thread
+    // then the logic that is being wrapped. To handle this we will
+    // dispatch the error handling logic as well so then it properly
+    // handles the try-catch and any exceptions that are thrown.
     public void handleRequest(HttpServerExchange exchange) {
         if (exchange.isInIoThread()) {
             exchange.dispatch(this);
