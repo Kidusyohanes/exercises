@@ -46,7 +46,6 @@ public class ServerMain {
         Undertow server = builder.build();
         System.out.printf("Server is listening on %s:%d...\n", addr, port);
         server.start();
-    }
 
     /**
      * Gets the environment variable at "env" or returns the default value "def" if
