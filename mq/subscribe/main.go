@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -17,11 +19,35 @@ func reqEnv(name string) string {
 	return val
 }
 
+func connectToMQ(addr string) (*amqp.Connection, error) {
+	mqURL := "amqp://" + addr
+	var conn *amqp.Connection
+	var err error
+	for i := 1; i <= maxConnRetries; i++ {
+		conn, err = amqp.Dial(mqURL)
+		if err == nil {
+			log.Printf("successfully connected to %s", mqURL)
+			return conn, nil
+		}
+		log.Printf("error connecting to MQ at %s: %v", mqURL, err)
+		log.Printf("will retry in %d seconds", i*2)
+		time.Sleep(time.Second * time.Duration(i*2))
+	}
+	return nil, err
+}
+
+func processMessages(msgs <-chan amqp.Delivery) {
+	for msg := range msgs {
+		log.Printf("received message: %s", string(msg.Body))
+		msg.Ack(false)
+	}
+}
+
 func main() {
 	mqAddr := reqEnv("MQADDR")
 	mqName := reqEnv("MQNAME")
 
-	conn, err := amqp.Dial("amqp://" + mqAddr)
+	conn, err := connectToMQ(mqAddr)
 	if err != nil {
 		log.Fatalf("error dialing MQ: %v", err)
 	}
@@ -50,8 +76,7 @@ func main() {
 		log.Fatalf("error consuming messages: %v", err)
 	}
 
-	for msg := range msgs {
-		log.Printf("received message: %s", string(msg.Body))
-		msg.Ack(false)
-	}
+	go processMessages(msgs)
+
+	http.ListenAndServe("127.0.0.1:4000", nil)
 }
