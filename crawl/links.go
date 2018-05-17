@@ -8,6 +8,7 @@ import (
 
 	"net/url"
 
+	"github.com/temoto/robotstxt"
 	"golang.org/x/net/html"
 )
 
@@ -95,3 +96,16 @@ func GetPageInfo(URL string) (*PageInfo, error) {
 		} //if start tag
 	} //for each token
 } //getPageSummary()
+
+//GetRobotsTxt fetches and parses the robots.txt returned from robotsURL.
+//Note that robotsURL should be a direct link to the robots.txt file for
+//the origin, and not some other URL in the origin.
+func GetRobotsTxt(robotsURL string) (*robotstxt.RobotsData, error) {
+	resp, err := http.Get(robotsURL)
+	if err != nil {
+		return nil, fmt.Errorf("error getting URL %s: %v", robotsURL, err)
+	}
+	defer resp.Body.Close()
+
+	return robotstxt.FromResponse(resp)
+}
