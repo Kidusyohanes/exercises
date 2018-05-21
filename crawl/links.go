@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 
@@ -97,15 +98,31 @@ func GetPageInfo(URL string) (*PageInfo, error) {
 	} //for each token
 } //getPageSummary()
 
-//GetRobotsTxt fetches and parses the robots.txt returned from robotsURL.
-//Note that robotsURL should be a direct link to the robots.txt file for
-//the origin, and not some other URL in the origin.
-func GetRobotsTxt(robotsURL string) (*robotstxt.RobotsData, error) {
-	resp, err := http.Get(robotsURL)
-	if err != nil {
-		return nil, fmt.Errorf("error getting URL %s: %v", robotsURL, err)
-	}
-	defer resp.Body.Close()
+//robotsCache is a cache for RobotsData
+var robotsCache = map[string]*robotstxt.RobotsData{}
 
-	return robotstxt.FromResponse(resp)
+//ShouldCrawl returns true if the crawler should crawl te URL
+func ShouldCrawl(URL string) bool {
+	parsedURL, err := url.Parse(URL)
+	if err != nil {
+		return false
+	}
+	robotsURL := fmt.Sprintf("%s://%s/robots.txt", parsedURL.Scheme, parsedURL.Host)
+	robotsData, found := robotsCache[robotsURL]
+	if !found {
+		resp, err := http.Get(robotsURL)
+		if err != nil {
+			log.Printf("error getting %s: %v", robotsURL, err)
+			return true
+		}
+		defer resp.Body.Close()
+
+		robotsData, err = robotstxt.FromResponse(resp)
+		if err != nil {
+			log.Printf("error parsing %s: %v", robotsURL, err)
+			return true
+		}
+		robotsCache[robotsURL] = robotsData
+	}
+	return robotsData.TestAgent(URL, "344bot")
 }
