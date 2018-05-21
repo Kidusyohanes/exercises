@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 const usage = `
@@ -22,7 +23,20 @@ type crawlResults struct {
 	err      error
 }
 
+func reportResults(r *crawlResults, results chan<- *crawlResults) {
+	results <- r
+}
+
 //TODO: define a worker function
+func worker(urlsToFetch <-chan string, results chan<- *crawlResults) {
+	log.Printf("worker starting...")
+	for URL := range urlsToFetch {
+		log.Printf("crawling %s...", URL)
+		info, err := GetPageInfo(URL)
+		go reportResults(&crawlResults{info, err}, results)
+		time.Sleep(time.Second)
+	}
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -42,19 +56,45 @@ func main() {
 
 	//TODO: create channels for the URLs to crawl (jobs)
 	//and the crawlResults of each crawl (results)
+	urlsToFetch := make(chan string, 2048)
+	results := make(chan *crawlResults, 2048)
+	seen := map[string]bool{}
 
 	//TODO: start workers on their own goroutines,
 	//passing those channels as arguments
-
-	//TODO: create a map to track all the URLs
-	//we've already crawled so that we don't
-	//crawl them multiple times
+	for i := 0; i < numWorkers; i++ {
+		go worker(urlsToFetch, results)
+	}
 
 	//TODO: write the first command-line arg
 	//to the URLs-to-crawl channel, and add it
 	//to the map of already-crawled URLs
+	startingURL := os.Args[1]
+	seen[startingURL] = true
+	urlsToFetch <- startingURL
+	urlsOutstanding := 1
 
 	//TODO: range over the results channel,
 	//processing each link in the crawled page info
-
+	for cr := range results {
+		urlsOutstanding--
+		if cr.err != nil {
+			log.Printf("error crawing: %v", cr.err)
+			continue
+		}
+		for _, link := range cr.pageInfo.Links {
+			if !seen[link] {
+				seen[link] = true
+				if ShouldCrawl(link) {
+					log.Printf("adding %s to work queue", link)
+					urlsToFetch <- link
+					urlsOutstanding++
+				}
+			}
+		}
+		log.Printf("%d URLs outstanding", urlsOutstanding)
+		if urlsOutstanding == 0 {
+			break
+		}
+	}
 }
