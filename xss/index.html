@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>XSS Demo</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        pre {
+            border-radius: 3px;
+            border: 1px solid #999;
+            background-color: #F5F5F5;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="name-form">
+            <div class="form-group">
+                <label for="name">What's your Name?</label>
+                <input id="name" type="text" class="form-control"/>        
+            </div>
+        </form>
+        <h1>Hello, <span id="name-out"></span>!</h1>
+        <p>Hint: try entering this into the input above and hitting return:</p>
+        <pre style="border:1px solid #CCC"><code>&lt;img src="does-not-exist.png" onerror="alert('pwned!');" style="display:none"/&gt;Your Name</code></pre>
+    </div>
+    <script src="index.js"></script>
+</body>
+</html>
