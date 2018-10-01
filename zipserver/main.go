@@ -27,9 +27,8 @@ func main() {
 
 func handleFunc(w http.ResponseWriter, r *http.Request) {
   /**
-    Modify this handler function to
-    1) return a JSON of Zipcode objects
-    2) server CORS requests
+    This is here for illustrative purposes only to demonstrate how a server works.
+    For the actual exercise, implement the handler inside zip.go in handlers/ folder.
   */
   if r.Method == "GET" {
     header := w.Header()
