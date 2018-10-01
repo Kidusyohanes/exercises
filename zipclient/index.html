@@ -1,0 +1,91 @@
+<DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">			
+	</head>
+	<body>
+		<h1> Zip Code Client </h1>
+		<div class="row">
+			<div class="col-md-6">
+				<div class="input-group">
+					<input type="text" 
+						id="city" 
+						class="form-control" 
+						onchange="getData();"
+						placeholder="Input City Here">
+					<div class="dropdown" style="display: inline-block">
+						<button class="btn btn-secondary dropdown-toggle" type="button" id="states" data-toggle="dropdown">
+							State
+						</button>
+						<div class="dropdown-menu"></div>
+					</div>
+					<div class="dropdown" style="display: inline-block;">
+						<button class="btn btn-secondary dropdown-toggle" type="button" id="zipcodes" data-toggle="dropdown">
+							Zipcodes
+						</button>
+						<div class="dropdown-menu"></div>
+					</div>
+				</div>
+			</div>
+		</div>		
+		<script type="text/javascript">	
+			document.addEventListener("DOMContentLoaded", function() {
+				fetch("http://localhost:4000").then( 
+					res => res.text() 
+				).then( 
+					text => alert(text)
+				).catch( 
+					err => console.log("Fetch failed.")
+				);
+			});
+
+			function getData() {
+				//  Get the value of the user input into the city field.
+				const cityString = document.getElementById("city").value;
+
+				/*
+					Demonstrate the use of browser's native "Fetch" API to make a GET HTTP request to the server.
+
+					For more about fetch api, read https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API. 
+				*/
+				fetch("localhost:4000/?q="+cityString, {
+					// fetch API allows you to specify the HTTP method 
+					method: "GET", 
+					// fetch API allows you to specify request headers
+					headers: {         
+						"Accept": "application/json" // in this case, we want server to return JSON
+					}
+				}).then( res => {
+					/*
+						This .then block will be called when the promise returned by fetch() function resolves.
+
+						"res" is a raw response object. We need to extract the actual json from the response body, 
+						so we have to call res.json(), and return the value, which will be caught in the next block.
+					*/
+					return res.json();
+				}).then( json => {
+					/*	
+						In this block, we have the actual json object returned by the server. 
+
+						We pass that to populateDropdowns function to, well, populate the dropdowns. 
+					*/
+					populateDropdowns("state", json);
+					populateDropdowns("zipcodes", json);
+				}).catch( err => {
+					alert(err);
+				});
+			}
+
+			function populateDropdowns(whichDropdown, json) {
+				/*
+					Implement a method that populates the specified dropdown with relevant dropdown items.
+
+					Hint: Use native Array.map() function 
+				*/
+
+
+			}
+		</script>
+	</body>
+</html>
+
