@@ -13,18 +13,12 @@
 						class="form-control" 
 						onchange="getData();"
 						placeholder="Input City Here">
-					<div class="dropdown" style="display: inline-block">
-						<button class="btn btn-secondary dropdown-toggle" type="button" id="states" data-toggle="dropdown">
-							State
-						</button>
-						<div class="dropdown-menu"></div>
-					</div>
-					<div class="dropdown" style="display: inline-block;">
-						<button class="btn btn-secondary dropdown-toggle" type="button" id="zipcodes" data-toggle="dropdown">
-							Zipcodes
-						</button>
-						<div class="dropdown-menu"></div>
-					</div>
+					<select id="state-dropdown" onchange="populateDropdowns(false);">
+						<option value="-">State</option>
+					</select>
+					<select id="zipcode-dropdown">
+						<option value="-">Zip Code</option>
+					</select>
 				</div>
 			</div>
 		</div>		
@@ -33,22 +27,27 @@
 				fetch("http://localhost:4000").then( 
 					res => res.text() 
 				).then( 
-					text => alert(text)
+					text => console.log(text)
 				).catch( 
 					err => console.log("Fetch failed.")
 				);
+
+				window.stateDropdown = document.getElementById("state-dropdown");
+				window.zipCodeDropdown = document.getElementById("zipcode-dropdown");
+				window.query = "";
 			});
+
 
 			function getData() {
 				//  Get the value of the user input into the city field.
-				const cityString = document.getElementById("city").value;
+				const cityString = window.query = document.getElementById("city").value;
 
 				/*
 					Demonstrate the use of browser's native "Fetch" API to make a GET HTTP request to the server.
 
 					For more about fetch api, read https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API. 
 				*/
-				fetch("localhost:4000/?q="+cityString, {
+				fetch("http://localhost:4000/search?q="+cityString, {
 					// fetch API allows you to specify the HTTP method 
 					method: "GET", 
 					// fetch API allows you to specify request headers
@@ -69,20 +68,65 @@
 
 						We pass that to populateDropdowns function to, well, populate the dropdowns. 
 					*/
-					populateDropdowns("state", json);
-					populateDropdowns("zipcodes", json);
+
+					console.log(json);
+					calcState(json);
+					populateDropdowns(true);
+					return true;
 				}).catch( err => {
-					alert(err);
+					//alert(err);
 				});
 			}
 
-			function populateDropdowns(whichDropdown, json) {
-				/*
-					Implement a method that populates the specified dropdown with relevant dropdown items.
 
-					Hint: Use native Array.map() function 
-				*/
+			function createSelectionItem(val) {
+				item = document.createElement("option");
+				item.setAttribute("value", val);
+				item.textContent = val;
+				return item;
+			}
 
+
+			function calcState(json) {
+				let db = {};
+				window.db = db;
+				window.zips = [];
+
+				json.forEach( (zip) => {
+					if (zip.state in db) {
+						db[zip.state].push(zip.code);
+					} else {
+						db[zip.state] = [];
+						db[zip.state].push(zip.code);						
+					}
+					window.zips.push(zip.code);
+				});
+
+				window.zips.unshift("Zip Code")
+			}
+
+			function populateDropdowns(init) {
+				const selState = stateDropdown.options[stateDropdown.selectedIndex].text
+
+				if (init) {
+					stateDropdown.innerHTML = "";
+					let states = Object.keys(window.db);
+					states.unshift("State");
+					states.forEach( state => stateDropdown.appendChild(createSelectionItem(state)) );
+				}
+
+				zipCodeDropdown.innerHTML = "";
+
+				if (selState == "State") {
+					window.zips.forEach( zipCode => zipCodeDropdown.appendChild(createSelectionItem(zipCode)) );
+				} else {
+					let filtered = window.db[selState];
+					zipCodeDropdown.appendChild(createSelectionItem("Zip Code"));
+
+					filtered.forEach( 
+						zipCode => zipCodeDropdown.appendChild(createSelectionItem(zipCode))
+					);					
+				}
 			}
 		</script>
 	</body>

@@ -6,6 +6,10 @@ package main
 */
 import (
   "net/http"
+  "exercises/zipserver/handlers"
+  "os"
+  "fmt"
+  "exercises/zipserver/models"
 )
 
 func main() {
@@ -19,22 +23,33 @@ func main() {
   //different resource paths
   mux := http.NewServeMux()
 
-  // register your handler function
-  mux.HandleFunc("/", handleFunc)
+  f, err := os.Open("zips.csv")
 
-  http.ListenAndServe(":4000", mux)
+  defer f.Close()
+
+  if err != nil {
+    fmt.Println("Error couldn't read file.")
+    return
+  } else {
+    zList, err := models.LoadZips(f, 42614)
+
+    if err != nil {
+      fmt.Println("Failed to create ZipIndex")
+      return
+    } else {
+      ctx := handlers.Ctx{
+        Db: models.BuildIndex(zList),
+      }
+
+      // register your handler function
+      mux.HandleFunc("/", IndexHandler)
+      mux.HandleFunc("/search", ctx.Handler)
+      http.ListenAndServe(":4000", mux)
+    }
+  }
 }
 
-func handleFunc(w http.ResponseWriter, r *http.Request) {
-  /**
-    This is here for illustrative purposes only to demonstrate how a server works.
-    For the actual exercise, implement the handler inside zip.go in handlers/ folder.
-  */
-  if r.Method == "GET" {
-    header := w.Header()
-    header.Set("Content-Type", "text/html; charset=utf-8")
-    w.Write([]byte("Hello"))
-  } else {
-    http.Error(w, "Only GET allowed.", http.StatusBadRequest)
-  }
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "text/plain")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
 }
