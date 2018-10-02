@@ -26,6 +26,9 @@ type ZipIndex map[string]ZipSlice
 
 
 func extractZipCode(line string) *Zip {
+	/*
+		Converts a line of string into a Zip struct.
+	*/
 	buf := make([]rune, len(line))
 
 	shouldCopy := true
@@ -48,24 +51,15 @@ func extractZipCode(line string) *Zip {
 //LoadZips loads the zip code records from CSV stream
 //returning a ZipSlice or an error.
 func LoadZips(r io.Reader, expectedNumber int) (ZipSlice, error) {
-	//TODO: process the `r` as a stream of CSV records
-	//creating a Zip struct for each record, and
-	//appending that to a ZipSlice that you return
-
 	zList := make(ZipSlice, expectedNumber)
 
-	scanner := bufio.NewScanner(r)
-	for i := 0; scanner.Scan(); i++ {
-		line := scanner.Text() // Println will add back the final '\n'
+	/*
+		TODO: Read the CSV file line by line, call extractZipCode function above, to
+		create a master slice of all the zip codes. Reference below stackoverflow question
+		to figure out how to read a file line by line.
 
-		z := extractZipCode(line)
-
-		if i >= len(zList) {
-			zList = append(zList, z)
-		} else {
-			zList[i] = z
-		}
-	}
+		https://stackoverflow.com/questions/8757389/reading-file-line-by-line-in-go
+	*/
 
 	return zList, nil
 }
@@ -75,15 +69,10 @@ func BuildIndex(zList ZipSlice) ZipIndex {
 
 	zInd := ZipIndex{}
 
-	for _, zip := range zList {
-			_, found := zInd[zip.City]
-
-			if !found {
-				zInd[zip.City] = ZipSlice{}
-			}
-
-			zInd[zip.City] = append(zInd[zip.City], zip)
-	}
+	/*
+		TODO: Finish this function that returns a ZipIndex, which is a map[string]ZipSlice,
+		where city names are keys, and slice of Zip's are values.
+	*/
 
 	return zInd
 }

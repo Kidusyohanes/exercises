@@ -11,7 +11,6 @@ import (
   "net/http"
   "exercises/zipserver/models"
   "encoding/json"
-  "fmt"
 )
 
 type Ctx struct {
@@ -19,10 +18,6 @@ type Ctx struct {
 }
 
 func (c *Ctx) Handler(w http.ResponseWriter, r *http.Request) {
-  /**
-    This is here for illustrative purposes only to demonstrate how a server works.
-    For the actual exercise, implement the handler inside zip.go in handlers/ folder.
-  */
   if r.Method == "GET" {
     query := r.FormValue("q")
 
@@ -31,20 +26,16 @@ func (c *Ctx) Handler(w http.ResponseWriter, r *http.Request) {
       return
     }
 
-    fmt.Println(query)
-
     header := w.Header()
-    header.Set("Access-Control-Allow-Origin", "*")
     header.Set("Content-Type", "application/json")
 
     zList, found := c.Db[query]
 
-    if found {
-      jsonStr, _ := json.Marshal(zList)
-      w.Write(jsonStr)
-    } else {
-      w.Write([]byte("[]"))
-    }
+    /*
+      Write code here to convert the zList to a JSON and return a reponse
+
+      HINT: use json.Marshal
+    */
   } else {
     http.Error(w, "Only GET Method allowed.", http.StatusBadRequest)
   }

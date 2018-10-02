@@ -13,18 +13,9 @@ import (
 )
 
 func main() {
-	//TODO: load the zip codes from "zips.csv"
-	//build a ZipIndex on the City field
-	//and start a web server that responds with
-	//all the Zips for a given city name
-
-  //create a new mux (router)
-  //the mux calls different functions for
-  //different resource paths
   mux := http.NewServeMux()
 
   f, err := os.Open("zips.csv")
-
   defer f.Close()
 
   if err != nil {
@@ -51,5 +42,4 @@ func main() {
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "text/plain")
-    w.Header().Set("Access-Control-Allow-Origin", "*")
 }
