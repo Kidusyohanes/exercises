@@ -139,23 +139,6 @@ func TestGetAll(t *testing.T) {
 
 This example tests a successful query that returned rows, but you can also configure the mock to return errors. See the [package documentation](https://godoc.org/github.com/DATA-DOG/go-sqlmock) for full details.
 
-## Extend It
-
-If you get done with the basic functionality and tests before the end of lecture, add support for attaching multiple "tags" to each task. For example, when inserting a task, you should be able to do something like this:
-
-```bash
-tasks insert "Test Task" tag1 tag2 tag3
-```
-
-These tags should be stored in a separate table from the task itself, using the task's ID as a foreign key. Use a database transaction to ensure that saving the task _and_ all of its tags are done in one atomic operation.
-
-Then extend the `tasks list` command to accept a tag you want to filter by. For example, the command:
-
-```bash
-tasks list mytag
-```
-
-should find all tasks that have the tag `mytag`.
 
 ## Lab: Docker Private Networks
 
