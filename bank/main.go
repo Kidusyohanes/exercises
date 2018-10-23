@@ -94,6 +94,10 @@ func (ctx *SharedResource) BalanceHandler(w http.ResponseWriter, r *http.Request
 		w.Write([]byte(payload))
 	} else if r.Method == "PUT" {
 		// handle PUT
+		if r.Header.Get("Origin") == "" {
+			http.Error(w, "Bad CORS Request", http.StatusBadRequest)
+			return
+		}
 
 		// validate request
 		if r.Header.Get("Content-Type") != "application/json" {
@@ -127,7 +131,7 @@ func (ctx *SharedResource) BalanceHandler(w http.ResponseWriter, r *http.Request
 	} else if r.Method == "OPTIONS" {
 		// handle CORS pre-flight
 
-		if r.Header.Get("Access-Control-Request-Method") == "" {
+		if r.Header.Get("Access-Control-Request-Method") == "" || r.Header.Get("Origin") == "" {
 				http.Error(w, "Bad CORS Pre-flight request", http.StatusBadRequest)
 				return
 		}
