@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>
+
+		<script>
+
+			document.addEventListener("DOMContentLoaded", function() {
+				console.log("Page Loaded");
+
+				fetch("http://localhost:4444/balance")
+					.then( res => res.json() )
+					.then( json => {
+						document.getElementById("currbal").value = json.amt;
+					}).catch( err => {
+						document.getElementById("currbal").value = "N/A";
+					});
+			});
+
+			function transact() {
+				let amt = document.getElementById("amount").value;
+
+				fetch("http://localhost:4444/balance", {
+					"method": "POST",
+					"body": {
+						"amt": amt
+					}
+				}).then( res => res.json() )
+				.then( json => {
+					document.getElementById("currbal").value = json.amt;
+				});
+
+				console.log("Transaction submitted!");
+
+				document.getElementById("amount").value	= 0;
+			}
+
+		</script>
+
+	</head>
+
+	<body>
+
+		<h1> Simple Bank Account </h1>
+
+		<h3> Current Balance <span id="currbal">Loading...</span> </h3>
+
+		<span> Amount: </span> <input id="amount" type="number" placeholder="enter amount e.g. 100 to deposit"/>
+		<button  onclick="transact()" > Submit </button>
+	</body>
+
+</html>
