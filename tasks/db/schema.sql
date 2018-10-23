@@ -1,4 +1,11 @@
--- TODO: create a table to store tasks
--- as defined in the models/tasks/task.go struct.
--- Use an auto-incrementing primary key for the ID field
--- see https://dev.mysql.com/doc/refman/5.7/en/create-table.html
+CREATE DATABASE IF NOT EXISTS todoDB;
+
+USE todoDB;
+
+/*
+  Fill in the rest
+*/
+
+CREATE TABLE IF NOT EXISTS todos (
+    id int not null auto_increment primary key
+);

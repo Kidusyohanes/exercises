@@ -72,7 +72,52 @@ tasks purge
 tasks list
 ```
 
-## Write Automated Unit Tests for the MySQLStore
+## Writing DB Unit Tests
+
+```go
+package main
+
+import "database/sql"
+
+func recordStats(db *sql.DB, userID, productID int64) (err error) {
+	tx, err := db.Begin()
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		switch err {
+		case nil:
+			err = tx.Commit()
+		default:
+			tx.Rollback()
+		}
+	}()
+
+	if _, err = tx.Exec("UPDATE products SET views = views + 1"); err != nil {
+		return
+	}
+	if _, err = tx.Exec("INSERT INTO product_viewers (user_id, product_id) VALUES (?, ?)", userID, productID); err != nil {
+		return
+	}
+	return
+}
+
+func main() {
+	// @NOTE: the real connection is not required for tests
+	db, err := sql.Open("mysql", "root@/blog")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	if err = recordStats(db, 1 /*some user id*/, 5 /*some product id*/); err != nil {
+		panic(err)
+	}
+}
+```
+
+## Alternative: Write Automated Unit Tests for the MySQLStore
 
 Your CLI will let you interactively test your MySQLStore implementation, but it would be better for the long-term to write some automated unit tests.
 
@@ -139,23 +184,6 @@ func TestGetAll(t *testing.T) {
 
 This example tests a successful query that returned rows, but you can also configure the mock to return errors. See the [package documentation](https://godoc.org/github.com/DATA-DOG/go-sqlmock) for full details.
 
-## Extend It
-
-If you get done with the basic functionality and tests before the end of lecture, add support for attaching multiple "tags" to each task. For example, when inserting a task, you should be able to do something like this:
-
-```bash
-tasks insert "Test Task" tag1 tag2 tag3
-```
-
-These tags should be stored in a separate table from the task itself, using the task's ID as a foreign key. Use a database transaction to ensure that saving the task _and_ all of its tags are done in one atomic operation.
-
-Then extend the `tasks list` command to accept a tag you want to filter by. For example, the command:
-
-```bash
-tasks list mytag
-```
-
-should find all tasks that have the tag `mytag`.
 
 ## Lab: Docker Private Networks
 
