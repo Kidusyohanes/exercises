@@ -20,6 +20,31 @@ func GetAuthenticatedUser(r *http.Request) (*User, error) {
 //TODO: define a type for authenticated handler functions
 //that take a `*User` as a third parameter
 
+type AuthenticatedHandlerFunc func(w http.ResponseWriter, r *http.Request, u *User)
+
 //TODO: create an adapter function that can adapt an
 //authenticated handler function into a regular http
 //handler function
+
+func EnsureAuthentication(handlerFunc AuthenticatedHandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, err := GetAuthenticatedUser(r)
+		if err != nil {
+			http.Error(w, "please sign in", http.StatusUnauthorized)
+			return
+		}
+		handlerFunc(w, r, user)
+	}
+}
+
+type AuthenticatedMux struct {
+	http.ServeMux
+}
+
+func NewAuthenticatedMux() *AuthenticatedMux {
+	return &AuthenticatedMux{}
+}
+
+func (am *AuthenticatedMux) HandleAuthenticatedFunc(pattern string, handlerFunc AuthenticatedHandlerFunc) {
+	am.HandleFunc(pattern, EnsureAuthentication(handlerFunc))
+}
