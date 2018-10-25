@@ -3,8 +3,7 @@ package middleware
 
 // TODO: 
 // Create a middleware that 
-// logs the request's method and all its headers
-// for every request
+// adds "Access-Control-Allow-Origin: *" header for every method
 
 
 // Write the middleware in three flavors
