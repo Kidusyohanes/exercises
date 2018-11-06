@@ -1,0 +1,134 @@
+<DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">			
+	</head>
+	<body>
+		<h1> Zip Code Client </h1>
+		<div class="row">
+			<div class="col-md-6">
+				<div class="input-group">
+					<input type="text" 
+						id="city" 
+						class="form-control" 
+						onchange="getData();"
+						placeholder="Input City Here">
+					<select id="state-dropdown" onchange="populateDropdowns(false);">
+						<option value="-">State</option>
+					</select>
+					<select id="zipcode-dropdown">
+						<option value="-">Zip Code</option>
+					</select>
+				</div>
+			</div>
+		</div>		
+		<script type="text/javascript">	
+			document.addEventListener("DOMContentLoaded", function() {
+				fetch("http://localhost:4000").then( 
+					res => res.text() 
+				).then( 
+					text => console.log(text)
+				).catch( 
+					err => console.log("Fetch failed.")
+				);
+
+				window.stateDropdown = document.getElementById("state-dropdown");
+				window.zipCodeDropdown = document.getElementById("zipcode-dropdown");
+				window.query = "";
+			});
+
+
+			function getData() {
+				//  Get the value of the user input into the city field.
+				const cityString = window.query = document.getElementById("city").value;
+
+				/*
+					Demonstrate the use of browser's native "Fetch" API to make a GET HTTP request to the server.
+
+					For more about fetch api, read https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API. 
+				*/
+				fetch("http://localhost:4000/search?q="+cityString, {
+					// fetch API allows you to specify the HTTP method 
+					method: "GET", 
+					// fetch API allows you to specify request headers
+					headers: {         
+						"Accept": "application/json" // in this case, we want server to return JSON
+					}
+				}).then( res => {
+					/*
+						This .then block will be called when the promise returned by fetch() function resolves.
+
+						"res" is a raw response object. We need to extract the actual json from the response body, 
+						so we have to call res.json(), and return the value, which will be caught in the next block.
+					*/
+					return res.json();
+				}).then( json => {
+					/*	
+						In this block, we have the actual json object returned by the server. 
+
+						We pass that to populateDropdowns function to, well, populate the dropdowns. 
+					*/
+
+					console.log(json);
+					calcState(json);
+					populateDropdowns(true);
+					return true;
+				}).catch( err => {
+					//alert(err);
+				});
+			}
+
+
+			function createSelectionItem(val) {
+				item = document.createElement("option");
+				item.setAttribute("value", val);
+				item.textContent = val;
+				return item;
+			}
+
+
+			function calcState(json) {
+				let db = {};
+				window.db = db;
+				window.zips = [];
+
+				json.forEach( (zip) => {
+					if (zip.state in db) {
+						db[zip.state].push(zip.code);
+					} else {
+						db[zip.state] = [];
+						db[zip.state].push(zip.code);						
+					}
+					window.zips.push(zip.code);
+				});
+
+				window.zips.unshift("Zip Code")
+			}
+
+			function populateDropdowns(init) {
+				const selState = stateDropdown.options[stateDropdown.selectedIndex].text
+
+				if (init) {
+					stateDropdown.innerHTML = "";
+					let states = Object.keys(window.db);
+					states.unshift("State");
+					states.forEach( state => stateDropdown.appendChild(createSelectionItem(state)) );
+				}
+
+				zipCodeDropdown.innerHTML = "";
+
+				if (selState == "State") {
+					window.zips.forEach( zipCode => zipCodeDropdown.appendChild(createSelectionItem(zipCode)) );
+				} else {
+					let filtered = window.db[selState];
+					zipCodeDropdown.appendChild(createSelectionItem("Zip Code"));
+
+					filtered.forEach( 
+						zipCode => zipCodeDropdown.appendChild(createSelectionItem(zipCode))
+					);					
+				}
+			}
+		</script>
+	</body>
+</html>
+
