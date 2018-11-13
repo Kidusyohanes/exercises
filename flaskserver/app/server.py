@@ -21,7 +21,7 @@ def todos():
 		abort(405)
 
 
-@app.route("/todo/<int: todoid>", methods=["GET", "PUT", "DELETE"])
+@app.route("/todo/<int:todoid>", methods=["GET", "PUT", "DELETE"])
 def todo():
 	return "TBD"
 

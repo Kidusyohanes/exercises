@@ -61,7 +61,7 @@ app.post("/order", (req, res) => {
 		// 1) Create a new_order message
 		// 2) Put the message in the NewOrdersQueue
 
-		const orderId = ObjectId() + ""; // generate a new UUID 
+		const orderId = ObjectId() + "";
 
 		const newOrderMsg = {
 			"type": "NewOrder",
@@ -70,9 +70,16 @@ app.post("/order", (req, res) => {
 			"timestamp": (new Date()).toUTCString()
 		};
 
-		/**
-			YOUR CODE HERE
-		*/
+		burgerChannel.sendToQueue(
+			queueName, 
+			new Buffer(JSON.stringify(newOrderMsg)),
+			{persistent: true}  // make sure messages are stored until ack'ed
+		);
+
+		burgerChannel.publish(ORDER_INFO_EXCHANGE, 
+			orderId,
+			new Buffer(JSON.stringify(generateOrderUpdate(orderId, "NewOrder", "Order Processing...")))
+		);
 
 		return res.status(201).json({
 			"message": "Order initiated. Tracking id: " + newOrderMsg.orderId

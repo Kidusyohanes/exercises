@@ -23,6 +23,28 @@ function handleNewOrder(msg) {
 
 	const shouldApprove = Math.random() <= 0.6 ? true : false;
 
+	// TODO: Your code here
+	if (shouldApprove) {
+		const approvedOrder = {
+			"type": "ApprovedOrder",
+			"orderId": newOrderMsg.orderId,
+			"messageStr": "Payment (Credit Card) Approved.",
+			"timestamp": (new Date()).toUTCString()
+		};
+
+		burgersChannel.publish(APPROVED_ORDERS_EXCHANGE, '', new Buffer(JSON.stringify(approvedOrder)));
+		burgersChannel.publish(ORDER_INFO_EXCHANGE, newOrderMsg.orderId, new Buffer(JSON.stringify(approvedOrder)));
+	} else {
+		const deniedOrder = {
+			"type": "DeniedOrder",
+			"orderId": newOrderMsg.orderId,
+			"messageStr": "Payment (Credit Card) Denied.",
+			"timestamp": (new Date()).toUTCString()
+		};
+
+		burgersChannel.publish(ORDER_INFO_EXCHANGE, newOrderMsg.orderId, new Buffer(JSON.stringify(deniedOrder)));		
+	}
+
 	// this statement makes sure that Rabbit deletes the message and doesn't redeliver
 	burgersChannel.ack(msg);
 }
