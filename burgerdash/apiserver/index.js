@@ -99,19 +99,10 @@ amqp.connect('amqp://localhost:5672', function(err, conn) {
 		process.exit(1);
 	}
 
-	conn.createChannel(function(err, ch) {
-		if (err) {
-			console.log("Failed to create NewOrdersChannel from API Server");
-			process.exit(1);
-		}
-
-		ch.assertQueue(queueName, {durable: true});
-		burgerChannel = ch;
-
-		server.listen(PORT, function () {
-			console.log(`Listening on port ${PORT}`);
-		});
-	});
+	//TODO: 
+	//Declare a durable queue called NewOrders by reading these two tutorials:
+	// https://www.rabbitmq.com/tutorials/tutorial-one-javascript.html
+	// https://www.rabbitmq.com/tutorials/tutorial-two-javascript.html
 });
 
 
