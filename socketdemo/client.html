@@ -3,6 +3,8 @@
     <head>
         <script>
 
+            let sock;
+
             document.addEventListener("DOMContentLoaded", (event) => {
                 sock = new WebSocket("ws://localhost:4001/ws");
 
@@ -15,22 +17,24 @@
                 };
 
                 sock.onmessage = (msg) => {
-                    console.log("Message received " + msg);
+                    console.log("Message received " + msg.data);
+
+                    document.getElementById("server-text").textContent = msg.data;
                 };
 
             });
 
             function submit() {
-                let pingMsg = document.getElementById("text-input").value;
+                let clientMsg = document.getElementById("text-input").value;
 
-                console.log(pingMsg);
+                console.log(clientMsg);
 
-                fetch("http://localhost:4001?q=" + encodeURIComponent(pingMsg));
-            } 
+                sock.send(clientMsg);
+            }
         </script>
     </head>
     <body>
-        <input type="text" id="text-input" placeholder="Enter value to display" > 
+        <input type="text" id="text-input" placeholder="Enter value to display" >
         <input type="submit" onclick="submit();">
         <div id="server-text"></div>
         <div id="server-time"></div>
