@@ -38,10 +38,20 @@ const (
 )
 
 // Thread-safe method for inserting a connection
-func (s *socketStore) InsertConnection(conn *websocket.Conn) {
+func (s *socketStore) InsertConnection(conn *websocket.Conn) int {
   s.lock.Lock()
+  connId := len(s.Connections)
   // insert socket connection
 	s.Connections = append(s.Connections, conn)
+  s.lock.Unlock()
+  return connId
+}
+
+// Thread-safe method for inserting a connection
+func (s *socketStore) RemoveConnection(connId int) {
+  s.lock.Lock()
+  // insert socket connection
+	s.Connections = append(s.Connections[:connId], s.Connections[connId+1:]...)
   s.lock.Unlock()
 }
 
@@ -83,7 +93,6 @@ var upgrader = websocket.Upgrader{
 
 
 func (sockets *socketStore) webSocketConnectionHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	// handle the websocket handshake
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -92,28 +101,31 @@ func (sockets *socketStore) webSocketConnectionHandler(w http.ResponseWriter, r 
 	}
 
   // Insert our connection onto our datastructure for ongoing usage
-  sockets.InsertConnection(conn)
+  connId := sockets.InsertConnection(conn)
 
   // Invoke a goroutine for handling control messages from this connection
-  go (func(conn *websocket.Conn) {
-
+  go (func(conn *websocket.Conn, connId int) {
     defer conn.Close()
+    defer sockets.RemoveConnection(connId)
 
     for {
       messageType, p, err := conn.ReadMessage()
 
       if messageType == TextMessage || messageType == BinaryMessage {
         fmt.Printf("Client says %v\n", p)
-
         fmt.Printf("Writing %s to all sockets\n", string(p))
         sockets.WriteToAllConnections(TextMessage, append([]byte("Hello from server: "), p...))
-      } else if messageType == CloseMessage || err != nil {
+      } else if messageType == CloseMessage {
+        fmt.Println("Close message received.")
+        break
+      } else if err != nil {
+        fmt.Println("Error reading message.")
         break
       }
       // ignore ping and pong messages
     }
 
-  })(conn)
+  })(conn, connId)
 }
 
 
